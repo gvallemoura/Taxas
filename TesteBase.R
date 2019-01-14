@@ -5,7 +5,7 @@ library(dplyr)
 library(ggplot2)
 library(ggvis)
 library(corrplot)
-completo  <- read.csv("Dados_v080119.csv",na.strings = "NULL",sep = ",", encoding = "latin1")
+completo  <- read.csv("Dados_v080119.csv",na.strings = "NULL",sep = ",")
 dados     <- select(completo, -numeroProposta, -dataEmissao, -numeroModalidade, -nomeAcionistaMajoritario, -dataAdimissaoAcionistaMajoritario, -cnaeTomador, -prazoMes, -ultimaTaxaAprovadaTomador, -pkCodPro, -CliExercicio_1, -CliExercicio_2, -CliExercicio_3)
 # Transformar certas colunas para factors
 dados$id<-as.factor(dados$id)
@@ -24,9 +24,9 @@ dados %>% ggvis(~numeroGrupoEconomico, ~TaxaCoberturaLiquidaCalculada, fill = ~u
 dados %>%filter(TaxaCoberturaLiquidaCalculada<10)%>%ggvis(~qtdParcFalencia_MA, ~TaxaCoberturaLiquidaCalculada, fill = ~descricaoModalidade) %>% layer_points()
 # Filtro
 dadosSP <- dados%>%filter(ufTomador == "SP")
-dados_10 <- dados %>%filter(TaxaCoberturaLiquidaCalculada<10)
+dados_10 <- dados %>%filter(TaxaCoberturaLiquidaCalculada<5)
 # Organizar
-dados%>%filter(ufTomador == "SP")%>%arrange(CliPasCirculante_1)
+#dados%>%filter(ufTomador == "SP")%>%arrange(CliPasCirculante_1)
 
 
 # Regressões iniciais
@@ -36,7 +36,7 @@ X$TaxaCoberturaLiquidaCalculada=NULL
 for (i in 2:86) {
   reg<-lm(Y ~ X[[i]])
   Rsqr<-summary(reg)
-  if (!is.na(Rsqr$r.squared) & Rsqr$r.squared > 0.1){
+  if (!is.na(Rsqr$r.squared) & Rsqr$r.squared > 0.2){
   print(c(i,colnames(X[i]),Rsqr$r.squared))
   }
 }
