@@ -20,18 +20,24 @@ dados$dataCadastroTomador<-as.Date(dados$dataCadastroTomador, format = "%d/%m/%Y
 
 
 # Gráficos
-dados %>% ggvis(~dataFundacaoTomador, ~TaxaCoberturaLiquidaCalculada, fill = ~ufTomador) %>% layer_points()
-dados %>%filter(TaxaCoberturaLiquidaCalculada<1)%>%ggvis(~qntdEmissaoGrupoEconomico, ~TaxaCoberturaLiquidaCalculada, fill = ~ufTomador) %>% layer_points()
+dados %>% ggvis(~numeroGrupoEconomico, ~TaxaCoberturaLiquidaCalculada, fill = ~ufTomador) %>% layer_points()
+dados %>%filter(TaxaCoberturaLiquidaCalculada<10)%>%ggvis(~qtdParcFalencia_MA, ~TaxaCoberturaLiquidaCalculada, fill = ~descricaoModalidade) %>% layer_points()
 # Filtro
 dadosSP <- dados%>%filter(ufTomador == "SP")
+dados_10 <- dados %>%filter(TaxaCoberturaLiquidaCalculada<10)
 # Organizar
 dados%>%filter(ufTomador == "SP")%>%arrange(CliPasCirculante_1)
 
+
+# Regressões iniciais
+Y<-dados_10$TaxaCoberturaLiquidaCalculada
+X<-dados_10
+X$TaxaCoberturaLiquidaCalculada=NULL
 for (i in 2:86) {
   reg<-lm(Y ~ X[[i]])
-  Ftest<-anova(reg)
-  if (!is.na(Ftest$`Pr(>F)`[1]) & Ftest$`Pr(>F)`[1] < 0.05){
-  print(i)
+  Rsqr<-summary(reg)
+  if (!is.na(Rsqr$r.squared) & Rsqr$r.squared > 0.1){
+  print(c(i,colnames(X[i]),Rsqr$r.squared))
   }
 }
   
